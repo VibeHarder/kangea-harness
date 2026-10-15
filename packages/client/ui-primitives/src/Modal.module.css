@@ -1,37 +1,26 @@
-/* Full-viewport layer (figma Mask + Dialog 451:18655): mask + centered card.
-   24px of air on every side; the top/bottom widen to the frame's published
-   overlay inset so a tall card stays clear of it.
-   Cards size against this padding box: consumers cap growth with
-   `max-height: 100%`, never their own viewport calc. */
+/* Full-viewport layer (figma Mask + Dialog 451:18655): mask + centered card. */
 .root {
-  pointer-events: auto;
   position: fixed;
   inset: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(24px, var(--dsh-frame-overlay-top, 24px)) 24px;
+  padding: 24px;
 }
 
-/* Only paint excludes the native caption; the root still blocks background clicks. */
+/* User/spec mask: rgba(0,0,0,0.24) + blur(2px) via --dsw-alias-bg-mask-1 /
+   --dsw-mask-blur (light); dark theme raises mask opacity. */
 .mask {
-  position: absolute;
-  inset: var(--dsh-frame-chrome-top, 0px) 0 0;
-  backdrop-filter: var(--dsw-mask-blur);
-}
-
-.mask::after {
-  content: '';
   position: absolute;
   inset: 0;
   background: var(--dsw-alias-bg-mask-1);
-  animation: modalEnter var(--ds-transition-duration) var(--ds-ease-in-out);
+  backdrop-filter: var(--dsw-mask-blur);
 }
 
-/* Dialogs use the prominent elevation on the secondary layer. */
+/* Dialog card (Abyss): radius-xl, shadow-lv3, layer-2 fill, l2 border,
+ * pb 24; entry fades in with a 2px rise. */
 .dialog {
-  box-sizing: border-box;
   position: relative;
   z-index: 1;
   display: flex;
@@ -40,24 +29,29 @@
   width: min(380px, 100%);
   padding: 0 0 24px;
   overflow: hidden;
-  border: 0;
-  border-radius: var(--dsw-radius-panel);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xl);
   background: var(--dsw-alias-bg-layer-2);
-  box-shadow: var(--dsw-elevation-prominent);
-  animation: modalEnter var(--ds-transition-duration) var(--ds-ease-in-out);
+  box-shadow: var(--dsw-shadow-lv3);
+  animation: dsh-dialog-in var(--ds-transition-duration-fast) var(--ds-ease-in-out);
 }
 
-@keyframes modalEnter {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes dsh-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mask::after, .dialog { animation: none; }
-}
-
-.dialog:focus {
-  outline: none;
+  .dialog {
+    animation: none;
+  }
 }
 
 .content {
@@ -78,9 +72,7 @@
 
 .title {
   margin: 0;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 500; /* figma wt510, rendered 500 */
+  font: var(--dsw-font-l-20);
   color: var(--dsw-alias-label-primary);
 }
 
@@ -92,7 +84,7 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
   color: var(--dsw-alias-label-secondary);
@@ -100,6 +92,11 @@
 
 .close:hover {
   background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 /* Description and body share the 332px content column (24px side pads). */

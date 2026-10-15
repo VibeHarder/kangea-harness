@@ -1,3 +1,9 @@
+/* Directory-browser dialog (figma 813-23126 family). The shared Modal renders
+ * headless here — mask, card, Escape only — and this module owns the figma
+ * frame: 680×500 card (viewport-clamped; upsized from the figma 600×420),
+ * header (title + crumbs, l3 separator),
+ * the one-or-two-column Miller content, and the bordered footer. */
+
 /* Doubled class beats Modal's own .dialog regardless of stylesheet order. */
 /* Short viewports clamp the card: header/footer are flex-none and the
  * columns scroll, so shrinking the height keeps Open/Cancel reachable
@@ -7,7 +13,12 @@
   height: min(500px, calc(100dvh - 32px));
   padding: 0;
   gap: 0;
-  /* The Modal card is an l2 surface and the columns below scroll on it:
+  /* Overlay language (Abyss spec): the shared Modal card already carries the
+   * l2 border, lv3 shadow, and the 0.1s fade + 2px rise entrance; this
+   * browse variant only swaps to the layer-3 overlay face and the m radius. */
+  background: var(--dsw-alias-bg-layer-3);
+  border-radius: var(--dsw-radius-m);
+  /* The Modal card is an elevated surface and the columns below scroll on it:
    * rebind the scrollbar indirection to the elevation pair here, on the
    * surface, so it inherits down to whichever descendant scrolls (the
    * rebinding contract in ui-theme styles/scrollbar.css). */
@@ -22,14 +33,15 @@
   display: contents;
 }
 
-/* Header block: pl24 pr14 pt16 pb8, 8px between title row and crumb row. */
+/* Header block: pl24 pr14 pt16 pb8, 8px between title row and crumb row.
+ * Hairline separator (Abyss spec: space and hairlines, not grey bars). */
 .header {
   display: flex;
   flex-direction: column;
   gap: 8px;
   flex: none;
   padding: 16px 14px 8px 24px;
-  border-bottom: 0.5px solid var(--dsw-alias-border-l3);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
 }
 
 .title {
@@ -57,7 +69,7 @@
   margin-left: -9px;
   padding: 0 8px;
   border: 1px solid transparent;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: 8px;
 }
 
 /* Lit by the affordance the row belongs to, never by a crumb: a crumb's hover
@@ -66,6 +78,12 @@
 .crumbBar:has(.crumbEditZone:focus-visible),
 .crumbBar:has(.pathInput) {
   border-color: var(--dsw-alias-border-l2);
+}
+
+/* Live path entry reads as a focused field: accent hairline + soft ring. */
+.crumbBar:has(.pathInput:focus) {
+  border-color: var(--dsw-alias-accent-primary);
+  box-shadow: 0 0 0 2px var(--dsw-alias-ring);
 }
 
 /* Deep chains scroll inside the trail (the effect pins the tail into view)
@@ -121,12 +139,6 @@
   cursor: pointer;
 }
 
-.crumb:focus-visible {
-  /* The trail scrolls, so an outer ring would be clipped; keep it inside. */
-  outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
-  outline-offset: -2px;
-}
-
 .crumb:hover {
   color: var(--dsw-alias-label-primary);
 }
@@ -151,7 +163,15 @@
   border: none;
   background: transparent;
   cursor: text;
-  outline: none;
+}
+
+/* Uniform keyboard ring (Abyss spec): never a bare outline reset. */
+.row:focus-visible,
+.crumb:focus-visible,
+.crumbEditZone:focus-visible,
+.showHiddenToggle:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .crumbEditGlyph {
@@ -221,8 +241,8 @@
 
 .divider {
   flex: none;
-  width: 0.5px;
-  background: var(--dsw-alias-border-l3);
+  width: 1px;
+  background: var(--dsw-alias-border-l1);
 }
 
 .rowSeat {
@@ -239,26 +259,20 @@
   flex: none;
   padding: 4px;
   border: none;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: var(--dsw-radius-s);
   background: transparent;
   text-align: left;
   cursor: pointer;
-}
-
-.row:focus-visible {
-  /* The column scrolls and its left edge carries no padding; keep the ring inside. */
-  outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
-  outline-offset: -2px;
 }
 
 .row:hover {
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
-/* Selection: pill fill + the open-folder glyph in the info accent. */
+/* Selection: active pill fill + the open-folder glyph in the accent ink. */
 .rowSelected,
 .rowSelected:hover {
-  background: var(--dsw-alias-interactive-bg-active, var(--dsw-alias-interactive-bg-hover));
+  background: var(--dsw-alias-interactive-bg-active);
 }
 
 .rowIcon {
@@ -268,7 +282,7 @@
 
 .rowIconSelected {
   flex: none;
-  color: var(--dsw-alias-button-info-fill);
+  color: var(--dsw-alias-accent-primary);
 }
 
 .rowName {
@@ -321,7 +335,8 @@
   right: 16px;
   bottom: 8px;
   padding: 2px 8px;
-  background: var(--dsw-alias-bg-layer-2);
+  /* Matches the card's own layer so the pill blends into the surface. */
+  background: var(--dsw-alias-bg-layer-3);
 }
 
 /* Footer: l3 separator on top, symmetric padding so the row sits vertically
@@ -335,7 +350,7 @@
   gap: 8px;
   flex: none;
   padding: 16px 24px;
-  border-top: 0.5px solid var(--dsw-alias-border-l3);
+  border-top: 1px solid var(--dsw-alias-border-l1);
 }
 
 /* Show-hidden toggle: a subtle fixed-label text button left of the gap;
@@ -378,11 +393,14 @@
   min-width: 72px;
 }
 
-/* Nested create dialog (figma 813:23278): a small centered card. */
+/* Nested create dialog (figma 813:23278): a small centered card in the same
+ * overlay language as the browse card (Modal supplies border/shadow/entrance). */
 .createDialog.createDialog {
   width: min(380px, 100%);
   padding: 0;
   gap: 0;
+  background: var(--dsw-alias-bg-layer-3);
+  border-radius: var(--dsw-radius-m);
 }
 
 .createBody {
@@ -412,13 +430,22 @@
   width: 100%;
   height: 44px;
   padding: 7px 14px;
-  border: 0.5px solid var(--dsw-alias-border-l4);
-  border-radius: var(--dsw-radius-lg);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 22px;
   outline: none;
   background: transparent;
   font-size: 14px;
   line-height: 22px;
   color: var(--dsw-alias-label-primary);
+  transition:
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+/* Focused text entry: accent hairline plus the shared soft ring. */
+.createInput:focus-visible {
+  border-color: var(--dsw-alias-accent-primary);
+  box-shadow: 0 0 0 2px var(--dsw-alias-ring);
 }
 
 .createInput::placeholder {
@@ -431,4 +458,10 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .createInput {
+    transition: none;
+  }
 }

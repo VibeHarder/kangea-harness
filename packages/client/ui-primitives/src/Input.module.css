@@ -1,16 +1,22 @@
+/* Abyss text field: hairline box on the layer-1 face; focus swaps the border
+ * to the sapphire accent and adds the 3px ring halo. */
 .wrap {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 32px;
   padding: 0 8px;
-  border: 0.5px solid var(--dsw-alias-border-l4);
-  border-radius: var(--dsw-radius-md);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-s);
   background: var(--dsw-alias-bg-layer-1);
+  transition:
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
 }
 
 .wrap:focus-within {
-  border-color: var(--dsw-alias-state-business-primary);
+  border-color: var(--dsw-alias-accent-primary);
+  box-shadow: 0 0 0 3px var(--dsw-alias-ring);
 }
 
 .icon {
@@ -26,6 +32,7 @@
   flex: 1;
   min-width: 0;
   border: none;
+  /* The wrap paints the focus treatment via :focus-within. */
   outline: none;
   background: transparent;
   font-size: 14px;

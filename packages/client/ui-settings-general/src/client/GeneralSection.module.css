@@ -1,10 +1,17 @@
 /* Feature-contributed rows own their chrome and separators; the section
- * strips the trailing separator wherever the column ends. */
+ * wraps them in one Abyss group card (layer-1 face, hairline, lv2 shadow)
+ * and strips the trailing separator wherever the column ends. */
 
 .section {
   display: flex;
   flex-direction: column;
   width: 100%;
+  box-sizing: border-box;
+  padding: 4px 16px;
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-l);
+  box-shadow: var(--dsw-shadow-lv2);
 }
 
 .section > :global([data-slot='settings.general.item']) > :last-child {

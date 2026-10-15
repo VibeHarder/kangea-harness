@@ -1,30 +1,32 @@
+/* Per-message feedback controls. The rating buttons mirror the shared message
+   IconActions chrome so the strip reads as one row; the note editor is an
+   inline expansion anchored to the same row. */
+
 .action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* Rides the Settings font-size axis like the host row's own actions
-     (ui-chat MessageIconActions), so slot-injected buttons match their
-     siblings at every size. */
-  width: calc(28px + var(--dsh-content-font-delta, 0px));
-  height: calc(28px + var(--dsh-content-font-delta, 0px));
+  width: 28px;
+  height: 28px;
   padding: 6px;
   border: none;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: var(--dsw-radius-s);
   background: transparent;
   color: var(--dsw-alias-label-tertiary);
   cursor: pointer;
-}
-
-/* The 15px glyphs follow the same px delta as the text they serve; the CSS
-   edge overrides each svg's own width/height attributes. */
-.action svg {
-  width: calc(15px + var(--dsh-content-font-delta, 0px));
-  height: calc(15px + var(--dsh-content-font-delta, 0px));
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    color var(--ds-transition-duration) var(--ds-ease-in-out);
 }
 
 .action:hover {
   background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .action:disabled {
@@ -33,14 +35,118 @@
 }
 
 /* A recorded rating stays legible without hover, so the signal survives a
-   pointer leaving the row. */
+   pointer leaving the row. Accent marks the stored choice. */
 .action[data-active] {
+  color: var(--dsw-alias-accent-primary);
+}
+
+/* Stored-note peek as a ghost capsule: hairline at rest, solid on hover. */
+.noteOpen {
+  max-width: 220px;
+  overflow: hidden;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-full);
+  background: transparent;
   color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+  line-height: 26px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    color var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.noteOpen:hover {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-interactive-bg-hover-solid);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.noteOpen:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
+}
+
+.noteEditor {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.noteInput {
+  width: 260px;
+  padding: 6px 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-s);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+  transition: border-color var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.noteInput:focus {
+  outline: none;
+  border-color: var(--dsw-alias-accent-primary);
+}
+
+.noteInput:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
+}
+
+.noteSave,
+.noteCancel {
+  height: 28px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--dsw-radius-full);
+  font: var(--dsw-font-xs-13);
+  cursor: pointer;
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    color var(--ds-transition-duration) var(--ds-ease-in-out),
+    opacity var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.noteSave:focus-visible,
+.noteCancel:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
+}
+
+.noteSave {
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+}
+
+.noteSave:hover:not(:disabled) {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.noteSave:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.noteCancel {
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.noteCancel:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
 }
 
 .failure {
   padding-left: 4px;
-  color: var(--dsw-alias-label-tertiary);
-  font-size: 13px;
-  line-height: 20px;
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xs-13);
+  line-height: 28px;
 }

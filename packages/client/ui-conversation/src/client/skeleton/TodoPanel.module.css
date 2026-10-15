@@ -51,6 +51,11 @@
   cursor: pointer;
 }
 
+.header:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
+}
+
 .lead {
   display: grid;
   flex: none;

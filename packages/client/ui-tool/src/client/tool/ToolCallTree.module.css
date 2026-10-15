@@ -1,12 +1,15 @@
 .callRow {
-  border-radius: var(--dsw-radius-sm);
+  border-radius: var(--dsw-radius-s);
 }
 
+/* Subcall branch: hairline guide centered under the parent's 20px icon tray,
+   indenting child rows to the parent title start (tray 20 + gap 8 = 28; the
+   child row's own -8px card bleed rides inside the padding). */
 .subCalls {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 4px 0 2px 22px;
-  padding-left: 8px;
-  border-left: 0.5px solid var(--dsw-alias-border-l2);
+  margin: 4px 0 2px 9px;
+  padding-left: 18px;
+  border-left: 1px solid var(--dsw-alias-border-l2);
 }

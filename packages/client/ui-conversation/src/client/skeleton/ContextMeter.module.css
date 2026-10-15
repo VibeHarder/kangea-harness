@@ -1,33 +1,32 @@
-/* Context-occupancy control below the composer plus its click-open breakdown
-   panel (menu surface: elevation-prominent). */
+/* Context-occupancy ring beside the send button plus its click-open breakdown
+   panel (menu surface: r12, inverted hairline, shadow-lv3). */
 
 .root {
+  position: relative;
   display: inline-flex;
-  flex: none;
 }
 
+/* Same 28px circular hit target family as the composer's attach button. */
 .trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: grid;
+  place-items: center;
   flex: none;
-  padding: 1px 8px;
+  width: 28px;
+  height: 28px;
   border: none;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: 999px;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
-  font-family: inherit;
-  font-size: var(--dsh-content-font-size-secondary, 13px);
-  font-variant-numeric: tabular-nums;
-  line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
-  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
   cursor: pointer;
 }
 
-.trigger:hover,
-.trigger[aria-expanded='true'] {
+.trigger:hover {
   background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-secondary);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .track {
@@ -44,21 +43,41 @@
 }
 
 .panel {
-  position: fixed;
-  z-index: 1100;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 100;
   box-sizing: border-box;
-  width: min(264px, calc(100vw - 24px));
+  width: 264px;
   padding: 12px;
-  border: 0;
-  border-radius: var(--dsw-radius-lg);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-m);
   background: var(--dsw-specific-menu);
-  backdrop-filter: var(--dsw-menu-backdrop-filter);
-  --dsw-elevation-stroke-color: var(--dsw-alias-border-l1);
-  box-shadow: var(--dsw-elevation-prominent);
+  box-shadow: var(--dsw-shadow-lv3);
   font-size: 12px;
   line-height: 20px;
   color: var(--dsw-alias-label-secondary);
   cursor: default;
+  /* Shared float entrance: fade + 2px rise. */
+  animation: meter-panel-in var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+@keyframes meter-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
 }
 
 .header {
@@ -95,7 +114,6 @@
   margin: 10px 0 12px;
   height: 4px;
   border-radius: 999px;
-  corner-shape: round;
   background: var(--dsw-alias-interactive-bg-hover);
   overflow: hidden;
 }
@@ -123,8 +141,10 @@
 }
 
 .colorTools {
-  /* The design platform ships no purple static token; violet-400 literal. */
-  --meter-tint: rgb(167, 139, 250);
+  /* The design platform ships no purple static token; the periwinkle
+     deepseek-300 is the nearest ramp step that stays distinct from the
+     messages blue (blue-450) and the system gray in both themes. */
+  --meter-tint: var(--dsw-static-deepseek-300);
 }
 
 .colorMessages {

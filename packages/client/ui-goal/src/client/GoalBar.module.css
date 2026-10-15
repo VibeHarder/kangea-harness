@@ -17,8 +17,6 @@
 }
 
 .bar {
-  position: relative;
-  isolation: isolate;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -28,21 +26,9 @@
   height: 36px;
   margin: 0 auto;
   padding: 4px 5px 4px 12px;
-  border: 0;
-  --dsw-elevation-stroke-color: var(--dsw-alias-border-l1);
-  border-radius: var(--dsw-radius-md);
-  box-shadow: var(--dsw-elevation-panel);
-}
-
-.bar::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--dsw-specific-menu);
-  backdrop-filter: var(--dsw-menu-backdrop-filter);
-  content: '';
-  pointer-events: none;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-specific-tip);
 }
 
 .goalGlyph {
@@ -85,14 +71,31 @@
 
 /* ---- Inline edit form ---- */
 
-/* The edit strip grows with a multi-line objective; actions stay on the last line. */
-.editBar {
-  height: auto;
-  min-height: 36px;
-  align-items: flex-end;
-  /* The editor scrolls inside this elevated menu-surface strip. */
-  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
-  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+.objectiveInput {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-base);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary);
+  outline: none;
+  transition:
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+/* Input focus choreography: sapphire stroke + soft ring. */
+.objectiveInput:focus {
+  border-color: var(--dsw-alias-accent-primary);
+  box-shadow: 0 0 0 2px var(--dsw-alias-ring);
+}
+
+.objectiveInput::placeholder {
+  color: var(--dsw-alias-label-caption);
 }
 
 /* ---- Icon actions ---- */
@@ -113,7 +116,6 @@
   padding: 0;
   border: none;
   border-radius: 999px;
-  corner-shape: round;
   background: transparent;
   color: var(--dsw-alias-label-tertiary);
   cursor: pointer;
@@ -122,6 +124,11 @@
 .iconBtn:hover {
   background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .iconBtn:disabled {

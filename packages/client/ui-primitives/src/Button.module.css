@@ -1,18 +1,27 @@
-/* Button sizes share the global control-radius scale. */
+/* Abyss button language: ink primary / hairline ghost, radius-m card corner,
+ * s-strong-14 label, 14px side padding. Height stays 36px (sm 28px). */
 .button {
-  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   border: none;
-  border-radius: var(--dsw-radius-md);
+  border-radius: var(--dsw-radius-m);
   cursor: pointer;
-  font-size: 14px;
-  line-height: 22px;
+  font: var(--dsw-font-s-strong-14);
   color: var(--dsw-alias-label-primary);
   background: transparent;
   padding: 0 14px;
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .button:disabled {
@@ -24,15 +33,17 @@
   height: 36px;
 }
 
-/* Compact controls retain their dimensions across filled and outlined variants. */
+/* Compact height for dense rows; no dedicated figma node (Icon_container
+ * 28x28 is the icon-only form) — geometry is ours. */
 .sm {
   height: 28px;
   font-size: 12px;
   line-height: 18px;
   padding: 0 10px;
-  border-radius: var(--dsw-radius-sm);
+  border-radius: var(--dsw-radius-s);
 }
 
+/* Primary action: ink fill, white label; hover uses the tuned hover fill. */
 .primary {
   background: var(--dsw-alias-button-primary-fill);
   color: var(--dsw-alias-label-primary-foreground);
@@ -42,6 +53,7 @@
   background: var(--dsw-alias-button-primary-hover);
 }
 
+/* Quiet borderless button (icon rows, toolbars): hover shows the weak wash. */
 .ghost:hover:not(:disabled) {
   background: var(--dsw-alias-interactive-bg-hover);
 }
@@ -50,14 +62,15 @@
   background: var(--dsw-alias-interactive-bg-active);
 }
 
-/* Outlined actions use the same neutral stroke as settings links. */
+/* Secondary action: hairline ghost — thin border on transparent fill,
+ * hover lands the solid wash. */
 .outline {
-  border: 0.5px solid var(--dsw-alias-border-l3);
+  border: 1px solid var(--dsw-alias-border-l2);
   background: transparent;
 }
 
 .outline:hover:not(:disabled) {
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--dsw-alias-interactive-bg-hover-solid);
 }
 
 .toolbar {

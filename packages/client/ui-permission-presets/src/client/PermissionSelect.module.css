@@ -1,14 +1,16 @@
+/* Small-capsule family (composer pills): hairline stroke + full radius,
+   solid fill on hover; matches the sibling model trigger. */
 .trigger {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   min-width: 0;
   max-width: 220px;
+  box-sizing: border-box;
   height: 28px;
-  padding: 0 4px 0 8px;
-  border: none;
-  /* Rounded chip chrome, matching the sibling model trigger. */
-  border-radius: var(--dsw-radius-sm);
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-full);
   outline: none;
   background: transparent;
   color: var(--dsw-alias-label-secondary);
@@ -16,14 +18,19 @@
   line-height: 20px;
   font-weight: 500;
   cursor: pointer;
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out);
 }
 
 .trigger:hover:not(:disabled) {
-  background: var(--dsw-alias-interactive-bg-hover);
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-interactive-bg-hover-solid);
 }
 
 .trigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
 }
 
 .trigger:disabled {
@@ -50,30 +57,6 @@
   white-space: nowrap;
 }
 
-.optionLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.optionLabelText {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.badge {
-  flex: none;
-  color: var(--dsw-alias-label-tertiary);
-  font-size: 8px;
-  line-height: 10px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-}
-
 .chevron {
   /* inline-flex, not inline: an inline seat reserves baseline descent under
      the svg and floats the glyph off-center in the 28px trigger. */
@@ -83,8 +66,8 @@
   transition: transform 120ms ease;
 }
 
-/* Narrow composer: mode text collapses while icons stay visible.
-   Only triggers that actually carry a mode glyph drop their label —
+/* Narrow composer: the trigger collapses to icon + chevron so the row keeps
+   fitting. Only triggers that actually carry a mode glyph drop their label —
    a host-configured mode without one keeps its text as the sole identifier.
    The 460px cut is the point where the row (attach + modes + model + send)
    starts squeezing labels; the container is the composer row (InputBar .row —

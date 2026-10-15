@@ -1,5 +1,5 @@
-/* Figma 10:2482: 24px Tool calls header, 4px gap, 141px code block cap.
-   SystemPromptRow reuses this sheet so both disclosures share one body. */
+/* Context row in the compact tool-card language: 20px accent-soft icon tray,
+   s-strong-14 role name, monospace source/summary, hairline card on hover. */
 
 .root {
   min-width: 0;
@@ -9,8 +9,41 @@
   padding-bottom: 4px;
 }
 
+/* Scoped under .root so these fields override the DisclosureRow base class
+   regardless of stylesheet order. */
+.root .row {
+  /* Base 24px content row + 2px vertical padding = a 28px compact card;
+     negative side margins keep the text column aligned with the flow. */
+  margin: 0 -8px;
+  padding: 2px 8px;
+  border-radius: var(--dsw-radius-s);
+  transition:
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.root .row:hover {
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l1);
+}
+
+/* Icon tray: the tool-card signature — accent glyph on an accent-soft square. */
+.root .leading {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 6px;
+  background: var(--dsw-alias-accent-soft);
+  color: var(--dsw-alias-accent-primary);
+}
+
+.root .title {
+  font: var(--dsw-font-s-strong-14);
+}
+
 .chevron {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--dsw-alias-accent-primary);
 }
 
 /* Separator and producer name beside the role title: ToolRow's summary geometry,
@@ -29,8 +62,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--dsw-alias-label-tertiary);
-  font-size: var(--dsh-content-font-size-secondary, 13px);
-  line-height: calc(24px + var(--dsh-content-font-delta, 0px));
+  font: var(--dsw-font-markdown-code);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -41,28 +73,24 @@
   min-width: 0;
   overflow: hidden;
   color: var(--dsw-alias-label-tertiary);
-  font-size: var(--dsh-content-font-size-secondary, 13px);
-  line-height: calc(24px + var(--dsh-content-font-delta, 0px));
+  font: var(--dsw-font-markdown-code);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Expanded context: card content area on the code-banner surface, closed by
+   a top hairline, aligned to the title start (20px tray + 8px gap). */
 .body {
   box-sizing: border-box;
-  /* Indent under the title, which starts at leading (16 + delta) + gap 6. */
-  width: calc(100% - 22px - var(--dsh-content-font-delta, 0px));
+  width: calc(100% - 28px);
   max-height: 141px;
-  margin: 4px 0 0 calc(22px + var(--dsh-content-font-delta, 0px));
+  margin: 4px 0 0 28px;
   overflow: auto;
   padding: 10px 16px 12px 12px;
-  border: none;
-  border-radius: var(--dsw-radius-md);
-  background: var(--dsw-alias-markdown-code-block);
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-s);
+  background: var(--dsw-alias-markdown-code-block-banner);
   color: var(--dsw-alias-label-tertiary);
-  /* Figma 10:2482 code text: the form bodies inherit it from the scrollport. */
+  /* Small code text: the form bodies inherit it from the scrollport. */
   font: 400 11px/16px var(--ds-font-family-code);
-}
-
-.toolChanges {
-  white-space: nowrap;
 }

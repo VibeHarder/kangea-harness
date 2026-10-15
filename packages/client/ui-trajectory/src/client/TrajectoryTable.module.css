@@ -256,7 +256,7 @@
   border-radius: 2px;
   color: var(--dsw-alias-label-secondary);
   background: var(--dsw-alias-bg-layer-1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--dsw-shadow-lv2);
   content: attr(data-label);
   font: 9px/12px var(--ds-font-family-code);
   opacity: 0;
@@ -785,8 +785,7 @@
 
 .toolCallNameTypeface {
   color: var(--dsw-alias-label-primary);
-  font: 400 12px/18px Menlo, Consolas, 'Liberation Mono', 'PingFang SC',
-    'Microsoft YaHei';
+  font: 400 12px/18px var(--ds-font-family-code);
 }
 
 .toolCallPayload {
@@ -1979,7 +1978,7 @@
     width: min(92%, 420px);
     max-width: 92%;
     border-left-color: var(--dsw-alias-border-l3);
-    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.14);
+    box-shadow: var(--dsw-shadow-lv3);
   }
 }
 
