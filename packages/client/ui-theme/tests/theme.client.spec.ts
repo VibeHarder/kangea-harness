@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { stubSettingsScope, type StubSettingsScope } from '@deepseek-ai/dsh-client-test-runtime'
+import { stubConfigForm, type StubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import type {
   ThemeSettings,
   ThemeSnapshot,
@@ -9,11 +9,11 @@ import type {
 } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { ThemeRuntime } from '@deepseek-ai/dsh-client-ui-theme/client'
 
-const make = (host = stubSettingsScope<ThemeSettings>()): {
+const make = (host = stubConfigForm<ThemeSettings>()): {
   ctx: Context
   theme: ThemeRuntime
   events: ThemeSnapshot[]
-  host: StubSettingsScope<ThemeSettings>
+  host: StubConfigForm<ThemeSettings>
 } => {
   const ctx = new Context()
   const events: ThemeSnapshot[] = []
@@ -26,10 +26,106 @@ describe('ThemeRuntime', () => {
     const { theme } = make()
     const snapshot = theme.getTheme()
     expect(snapshot.preference).toBe('system')
+    expect(snapshot.fontSizes.text).toBe(14)
     // jsdom matchMedia is absent; system resolves to light.
     expect(snapshot.active.id).toBe('light')
     expect(snapshot.active.colorScheme).toBe('light')
     expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark'])
+  })
+
+  it('seeds the initial font size from the boot-script body variable, ignoring junk', () => {
+    // The Host boot script writes the durable size on body before any plugin
+    // runs; the first snapshot must match it so activation never flashes 14.
+    document.body.style.setProperty('--dsh-content-font-size', '22px')
+    try {
+      expect(make().theme.getTheme().fontSizes.text).toBe(22)
+      document.body.style.setProperty('--dsh-content-font-size', '23px')
+      expect(make().theme.getTheme().fontSizes.text).toBe(14)
+    } finally {
+      document.body.style.removeProperty('--dsh-content-font-size')
+    }
+  })
+
+  it.each([10, 22])('setFontSize(%i) switches, writes through the scope, and republishes; same value is a no-op', (fontSize) => {
+    const { theme, events, host } = make()
+    theme.setFontSize('text', fontSize)
+    expect(theme.getTheme().fontSizes.text).toBe(fontSize)
+    expect(host.set).toHaveBeenCalledWith('fontSize', fontSize)
+    expect(events).toHaveLength(1)
+    theme.setFontSize('text', fontSize)
+    expect(events).toHaveLength(1)
+    expect(host.set).toHaveBeenCalledOnce()
+  })
+
+  it('rejects out-of-range and fractional font sizes', () => {
+    const { theme, events, host } = make()
+    for (const px of [9, 23, 14.5, Number.NaN]) {
+      expect(() => { theme.setFontSize('text', px) }).toThrow('outside 10..22')
+    }
+    expect(events).toHaveLength(0)
+    expect(host.set).not.toHaveBeenCalled()
+  })
+
+  it('sets code and terminal sizes independently within their own ranges', () => {
+    const { theme, host } = make()
+    theme.setFontSize('code', 16)
+    theme.setFontSize('terminal', 20)
+    expect(theme.getTheme().fontSizes).toEqual({ text: 14, code: 16, terminal: 20 })
+    expect(host.set).toHaveBeenCalledWith('codeFontSize', 16)
+    expect(host.set).toHaveBeenCalledWith('terminalFontSize', 20)
+    expect(() => { theme.setFontSize('code', 17) }).toThrow('code font size 17 is outside 10..16')
+    expect(() => { theme.setFontSize('terminal', 9) }).toThrow('outside 10..20')
+  })
+
+  it('seeds code and terminal sizes from the boot-script body variables, ignoring junk', () => {
+    document.body.style.setProperty('--dsh-code-font-size', '14px')
+    document.body.style.setProperty('--dsh-terminal-font-size', '99px')
+    try {
+      expect(make().theme.getTheme().fontSizes).toEqual({ text: 14, code: 14, terminal: 13 })
+    } finally {
+      document.body.style.removeProperty('--dsh-code-font-size')
+      document.body.style.removeProperty('--dsh-terminal-font-size')
+    }
+  })
+
+  it('adopts a published Host font size without writing it back', () => {
+    const { theme, events, host } = make()
+    host.publish({ status: 'ready', value: { preference: 'system', fontSize: 12, codeFontSize: 15, terminalFontSize: 18, textFontFamily: '', codeFontFamily: '', terminalFontFamily: '' }, revision: 1, writable: true })
+    expect(theme.getTheme().fontSizes).toEqual({ text: 12, code: 15, terminal: 18 })
+    expect(events).toHaveLength(1)
+    expect(host.set).not.toHaveBeenCalled()
+  })
+
+  it('seeds initial font lists from the boot-script body variables, normalizing them', () => {
+    document.body.style.setProperty('--dsh-font-family-code', 'Iosevka')
+    try {
+      expect(make().theme.getTheme().fontFamilies).toEqual({ text: '', code: '"Iosevka"', terminal: '' })
+    } finally {
+      document.body.style.removeProperty('--dsh-font-family-code')
+    }
+  })
+
+  it('setFontFamily normalizes, writes one role through the scope, and republishes; same list is a no-op', () => {
+    const { theme, events, host } = make()
+    theme.setFontFamily('terminal', ' MesloLGS NF ,monospace,, ')
+    expect(theme.getTheme().fontFamilies).toEqual({ text: '', code: '', terminal: '"MesloLGS NF", monospace' })
+    expect(host.set).toHaveBeenCalledWith('terminalFontFamily', '"MesloLGS NF", monospace')
+    expect(events).toHaveLength(1)
+    theme.setFontFamily('terminal', '"MesloLGS NF", monospace')
+    expect(events).toHaveLength(1)
+    theme.setFontFamily('terminal', ' , ')
+    expect(theme.getTheme().fontFamilies.terminal).toBe('')
+    expect(host.set).toHaveBeenLastCalledWith('terminalFontFamily', '')
+  })
+
+  it('adopts published Host font lists, normalizing hand-edited values, without writing them back', () => {
+    const { theme, events, host } = make()
+    host.publish({ status: 'ready', value: { preference: 'system', fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: 'Inter', codeFontFamily: '"Fira Code"', terminalFontFamily: '' }, revision: 1, writable: true })
+    expect(theme.getTheme().fontFamilies).toEqual({ text: '"Inter"', code: '"Fira Code"', terminal: '' })
+    expect(events).toHaveLength(1)
+    host.publish({ value: { preference: 'system', fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: '"Inter"', codeFontFamily: 'Fira Code', terminalFontFamily: '' }, revision: 2 })
+    expect(events).toHaveLength(1)
+    expect(host.set).not.toHaveBeenCalled()
   })
 
   it('setTheme switches, writes through the scope, republishes, and keeps DOM untouched', () => {
@@ -37,10 +133,7 @@ describe('ThemeRuntime', () => {
     theme.setTheme('dark')
     expect(theme.getTheme().preference).toBe('dark')
     expect(theme.getTheme().active.colorScheme).toBe('dark')
-    // Both durable fields: the selection, and the palette it paints (the
-    // Host boot script's first-paint hint).
     expect(host.set).toHaveBeenCalledWith('preference', 'dark')
-    expect(host.set).toHaveBeenCalledWith('colorScheme', 'dark')
     expect(events).toHaveLength(1)
     expect(events[0]).toBe(theme.getTheme())
     // The service never touches presentation state.
@@ -48,32 +141,37 @@ describe('ThemeRuntime', () => {
     // Same-value set is a no-op (no extra event).
     theme.setTheme('dark')
     expect(events).toHaveLength(1)
-    expect(host.set).toHaveBeenCalledTimes(2)
+    expect(host.set).toHaveBeenCalledOnce()
   })
 
   it('adopts a published Host section without writing it back', () => {
     const { theme, events, host } = make()
-    host.publish({
-      status: 'ready',
-      value: { preference: 'dark', colorScheme: 'dark' },
-      revision: 1,
-      writable: true,
-    })
+    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: '', codeFontFamily: '', terminalFontFamily: '' }, revision: 1, writable: true })
     expect(theme.getTheme().preference).toBe('dark')
     expect(events).toHaveLength(1)
     expect(host.set).not.toHaveBeenCalled()
-    host.publish({ value: { preference: 'dark', colorScheme: 'dark' }, revision: 2 })
+    host.publish({ value: { preference: 'dark', fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: '', codeFontFamily: '', terminalFontFamily: '' }, revision: 2 })
     expect(events).toHaveLength(1)
   })
 
+  it('holds its own changes while writes are pending, then converges on the durable section', async () => {
+    const { theme, host } = make()
+    const section = { preference: 'system' as const, fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: '', codeFontFamily: '', terminalFontFamily: '' }
+    host.publish({ status: 'ready', value: section, revision: 1, writable: true })
+    const write = Promise.withResolvers<boolean>()
+    host.set.mockReturnValue(write.promise)
+    theme.setFontSize('code', 13)
+    // A Host echo of an earlier write must not revert the pending local change.
+    host.publish({ value: { ...section, terminalFontSize: 15 }, revision: 2 })
+    expect(theme.getTheme().fontSizes).toEqual({ text: 14, code: 13, terminal: 13 })
+    host.publish({ value: { ...section, codeFontSize: 13, terminalFontSize: 15 }, revision: 3 })
+    write.resolve(true)
+    await vi.waitFor(() => { expect(theme.getTheme().fontSizes).toEqual({ text: 14, code: 13, terminal: 15 }) })
+  })
+
   it('adopts a section already standing at construction', () => {
-    const host = stubSettingsScope<ThemeSettings>()
-    host.publish({
-      status: 'ready',
-      value: { preference: 'dark', colorScheme: 'dark' },
-      revision: 1,
-      writable: true,
-    })
+    const host = stubConfigForm<ThemeSettings>()
+    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14, codeFontSize: 11, terminalFontSize: 13, textFontFamily: '', codeFontFamily: '', terminalFontFamily: '' }, revision: 1, writable: true })
     const { theme } = make(host)
     expect(theme.getTheme().preference).toBe('dark')
   })
@@ -91,56 +189,16 @@ describe('ThemeRuntime', () => {
     expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark', 'sepia'])
     theme.setTheme('sepia')
     expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('red')
-    // Registration is the durability gate: a theme pack's id persists exactly
-    // like a built-in, with the pack's own palette as the first-paint hint.
-    expect(host.set).toHaveBeenNthCalledWith(1, 'preference', 'sepia')
-    expect(host.set).toHaveBeenNthCalledWith(2, 'colorScheme', 'light')
     dispose()
     expect(theme.getTheme().preference).toBe('system')
     expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark'])
-    // Disposal is not a user gesture: the durable selection is left alone so a
-    // reloaded pack comes back selected.
-    expect(host.set).toHaveBeenCalledTimes(2)
+    // Custom ids are in-process extension themes; only the built-in product
+    // preferences cross the Host settings schema.
+    expect(host.set).not.toHaveBeenCalled()
     // register + set + dispose = three publishes; disposer is idempotent.
     expect(events.length).toBe(3)
     dispose()
     expect(events.length).toBe(3)
-  })
-
-  it('persists a system selection with a system first-paint hint', () => {
-    const { theme, host } = make()
-    theme.setTheme('dark')
-    theme.setTheme('system')
-    expect(host.set).toHaveBeenNthCalledWith(3, 'preference', 'system')
-    expect(host.set).toHaveBeenNthCalledWith(4, 'colorScheme', 'system')
-  })
-
-  it('adopts a durable theme-pack id, paints the OS default, and activates it on registration', () => {
-    const { theme, events, host } = make()
-    // The durable selection arrives from the settings scope before the theme
-    // pack's plugin registers the theme — the order this feature has to
-    // survive, since adoption runs inside a scope subscriber.
-    host.publish({
-      status: 'ready',
-      value: { preference: 'starlight', colorScheme: 'dark' },
-      revision: 1,
-      writable: true,
-    })
-    const pending = theme.getTheme()
-    expect(pending.preference).toBe('starlight')
-    // jsdom has no matchMedia, so the OS default resolves to light.
-    expect(pending.active.id).toBe('light')
-    expect(pending.active.tokens).toEqual({})
-    expect(host.set).not.toHaveBeenCalled()
-
-    theme.register({ id: 'starlight', colorScheme: 'dark', tokens: { '--dsw-alias-bg-base': 'midnight' } })
-    const active = theme.getTheme()
-    expect(active.preference).toBe('starlight')
-    expect(active.active.id).toBe('starlight')
-    expect(active.active.tokens['--dsw-alias-bg-base']).toBe('midnight')
-    // Adoption and registration: one publish each, no write-back either time.
-    expect(events).toHaveLength(2)
-    expect(host.set).not.toHaveBeenCalled()
   })
 
   it('disposing an inactive theme keeps the active preference', () => {
@@ -280,22 +338,6 @@ describe('ThemeRuntime', () => {
       media.flip()
       expect(theme.getTheme().active.id).toBe('light')
       expect(events).toHaveLength(1)
-    })
-
-    it('a preference no registered theme answers to follows OS flips', () => {
-      const media = stubMedia(true)
-      const { theme, events, host } = make()
-      host.publish({
-        status: 'ready',
-        value: { preference: 'starlight', colorScheme: 'dark' },
-        revision: 1,
-        writable: true,
-      })
-      expect(theme.getTheme().active.id).toBe('dark')
-      media.flip()
-      expect(theme.getTheme().active.id).toBe('light')
-      expect(theme.getTheme().preference).toBe('starlight')
-      expect(events).toHaveLength(2)
     })
 
     it('OS flips do not republish while a concrete preference is set', () => {
