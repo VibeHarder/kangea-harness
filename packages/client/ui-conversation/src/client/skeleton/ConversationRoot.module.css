@@ -265,14 +265,22 @@
   /* Input mask (figma 1205:27463): transcript fades out under a FIXED 36px
      band at the seat's top (the figma 24% of the resting ~150px composer),
      solid below — px stops, not %, so a growing draft only widens the solid
-     region and the fade band never stretches. The 0px stop is bg-base at
-     zero alpha (not white, which the figma export hardcodes) so both themes
-     fade from their own base. */
+     region and the fade band never stretches. The 0px stop is the shell
+     surface at zero alpha (not white, which the figma export hardcodes) so
+     both themes fade from their own base. The surface is ui-theme's
+     --dsh-shell-surface, which defaults to --dsw-alias-bg-base: a theme with
+     backdrop artwork rebinds it translucent and the band stops being a wall. */
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--dsw-alias-bg-base) 0%, transparent) 0px,
-    var(--dsw-alias-bg-base) 36px
+    color-mix(in srgb, var(--dsh-shell-surface) 0%, transparent) 0px,
+    var(--dsh-shell-surface) 36px
   );
+  /* Frosts whatever the band sits over — transcript scrolling under the fade,
+     and the backdrop artwork once a theme makes the surface translucent — so
+     the composer's own text keeps its contrast against a busy background.
+     Static, never animated, and scoped to the docked band rather than the
+     hero seat: the blurred area stays a strip at the column's foot. */
+  backdrop-filter: blur(12px);
 }
 
 /* Views may opt into a composer overlay while ConversationRoot retains

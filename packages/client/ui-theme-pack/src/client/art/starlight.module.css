@@ -1,0 +1,117 @@
+/* Starlight artwork: a fibre-optic star roof.
+
+   Three star fields, each a repeating tile of radial-gradient points, at three
+   sizes and densities; the tiles are deliberately co-prime-ish so no visible
+   grid emerges where they overlap. Points take their color from
+   --dsh-backdrop-ink, and one point in eight from --dsh-backdrop-accent — the
+   champagne gold stays a garnish, never a wash.
+
+   Only `opacity` animates, and only on two of the three fields. Nothing here
+   moves the background position: a repainting gradient across the whole window
+   is exactly what streaming output cannot afford. */
+
+.starlight {
+  position: absolute;
+  inset: 0;
+}
+
+/* The galaxy band: one long, very faint ellipse tilted across the upper sky. */
+.band {
+  position: absolute;
+  top: -8%;
+  left: -25%;
+  width: 150%;
+  height: 64%;
+  transform: rotate(-18deg);
+  opacity: 0.07;
+  background: radial-gradient(ellipse 44% 34% at 50% 50%, var(--dsh-backdrop-ink) 0%, transparent 72%);
+}
+
+.fields {
+  position: absolute;
+  inset: 0;
+}
+
+/* Bleed past the frame so a tile seam never lands on a visible edge. */
+.field {
+  position: absolute;
+  inset: -6%;
+  background-repeat: repeat;
+}
+
+/* Far field: the largest, sparsest stars. Static — it is the anchor the two
+   twinkling layers read against. */
+.field:nth-child(1) {
+  opacity: 0.9;
+  background-size: 460px 420px;
+  background-image:
+    radial-gradient(circle 1.8px at 12% 18%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.5px at 63% 9%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.7px at 84% 41%, var(--dsh-backdrop-accent) 0 58%, transparent 100%),
+    radial-gradient(circle 1.4px at 31% 55%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.6px at 71% 68%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.3px at 47% 83%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.5px at 8% 91%, var(--dsh-backdrop-ink) 0 58%, transparent 100%),
+    radial-gradient(circle 1.4px at 93% 88%, var(--dsh-backdrop-ink) 0 58%, transparent 100%);
+}
+
+/* Mid field: the primary twinkle, on a 5s breath. */
+.field:nth-child(2) {
+  opacity: 0.75;
+  background-size: 283px 261px;
+  background-image:
+    radial-gradient(circle 1.2px at 22% 11%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1.1px at 55% 26%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1.3px at 9% 44%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1.2px at 78% 37%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1.4px at 40% 62%, var(--dsh-backdrop-accent) 0 55%, transparent 100%),
+    radial-gradient(circle 1.1px at 88% 71%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1.2px at 27% 87%, var(--dsh-backdrop-ink) 0 55%, transparent 100%),
+    radial-gradient(circle 1px at 66% 94%, var(--dsh-backdrop-ink) 0 55%, transparent 100%);
+}
+
+/* Near field: the dust — smallest points, densest tile, slowest breath, offset
+   so the two twinkles never peak together. */
+.field:nth-child(3) {
+  opacity: 0.5;
+  background-size: 173px 191px;
+  background-image:
+    radial-gradient(circle 0.9px at 17% 29%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 0.8px at 49% 13%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 1px at 74% 24%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 0.9px at 33% 48%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 0.8px at 91% 57%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 1.1px at 58% 73%, var(--dsh-backdrop-accent) 0 52%, transparent 100%),
+    radial-gradient(circle 0.9px at 12% 81%, var(--dsh-backdrop-ink) 0 52%, transparent 100%),
+    radial-gradient(circle 0.8px at 82% 92%, var(--dsh-backdrop-ink) 0 52%, transparent 100%);
+}
+
+@keyframes starlight-twinkle {
+  from {
+    opacity: 0.34;
+  }
+
+  to {
+    opacity: 0.92;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .field:nth-child(2) {
+    animation: starlight-twinkle 5s var(--ds-ease-in-out) infinite alternate;
+  }
+
+  .field:nth-child(3) {
+    animation: starlight-twinkle 8s var(--ds-ease-in-out) -2.5s infinite alternate;
+  }
+}
+
+/* Reduced motion keeps the composition and drops the breath: the two fields
+   hold the mid opacity of their cycle, so the sky still reads as layered. */
+@media (prefers-reduced-motion: reduce) {
+  .field:nth-child(2),
+  .field:nth-child(3) {
+    animation: none;
+    opacity: 0.63;
+  }
+}

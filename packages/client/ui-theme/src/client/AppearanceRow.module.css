@@ -1,12 +1,12 @@
-/* Appearance row (figma 'Frame 2117131228': title + cube row, column gap 8,
- * pad 16/0, hairline separator; the section column strips it when last). */
+/* Appearance row: title over the theme gallery (grid of live micro-previews),
+ * pad 16/0, hairline separator; the section column strips it when last. */
 
 .group {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 16px 0;
-  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
 }
 
 .title {
@@ -16,42 +16,162 @@
   color: var(--dsw-alias-label-primary);
 }
 
-.cubeRow {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-  flex-wrap: wrap;
+/* Three tiles per row; minmax(0, 1fr) lets them shrink with the panel instead
+ * of overflowing it. */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
-/* Appearance cube (figma '.Selector Cube' 276x82, pad 20/32, centered
- * icon-over-label column, gap 4); flexed down from the figma width so all
- * three sit on one row in the 800 panel, wrapping when narrower. */
-.themeCube {
+.tile {
+  position: relative;
   box-sizing: border-box;
-  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 20px 32px;
-  border: 0.5px solid var(--dsw-alias-border-l4);
-  border-radius: var(--dsw-radius-xl);
-  background: transparent;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-m);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: var(--dsw-shadow-lv1);
   font: inherit;
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 13px;
+  line-height: 20px;
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
+  /* Compositor-only: the shadow tier swaps instantly, only transform eases. */
+  transition: transform 0.2s ease;
 }
 
-.themeCube:hover:not(.selected) {
-  background: var(--dsw-alias-interactive-bg-hover);
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--dsw-shadow-lv2);
 }
 
-/* Selected cube: #F5F6F7 fill + #ADB2B8 border (static token — the bluish-400
- * step has no alias-layer name). */
+/* Selected: a 2px accent ring drawn inside the border box so neither the grid
+ * nor the hover lift shifts when the selection moves. */
 .selected {
-  background: var(--dsw-alias-bg-module-platform);
-  border-color: var(--dsw-static-neutral-bluish-400);
+  border-color: var(--dsw-alias-accent-primary);
+  outline: 2px solid var(--dsw-alias-accent-primary);
+  outline-offset: -2px;
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--dsw-alias-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
+  }
+
+  .tile:hover {
+    transform: none;
+  }
+}
+
+/* The micro-preview. Its own token values arrive inline from the theme's map,
+ * so every role below resolves against that theme rather than the live one. */
+.preview {
+  /* Theme packs publish their decorated backdrop through --dsh-backdrop-base
+   * on the document; drop the inherited value so a tile only ever paints the
+   * backdrop its own inline map supplies, falling back to the canvas color. */
+  --dsh-backdrop-base: initial;
+  --dsh-tile-backdrop: var(--dsh-backdrop-base, var(--dsw-alias-bg-base));
+  --dsh-tile-surface: var(--dsw-alias-bg-layer-1);
+  --dsh-tile-sidebar: var(--dsw-specific-sidebar-fill);
+  --dsh-tile-line: var(--dsw-alias-label-secondary);
+  --dsh-tile-accent: var(--dsw-alias-accent-primary);
+  --dsh-tile-edge: var(--dsw-alias-border-l2);
+  display: flex;
+  gap: 4px;
+  height: 56px;
+  padding: 5px;
+  border: 1px solid var(--dsh-tile-edge);
+  border-radius: var(--dsw-radius-s);
+  background: var(--dsh-tile-backdrop);
+  overflow: hidden;
+}
+
+/* The built-in light/dark themes carry no token map: their palette lives in
+ * the document-level sheets, which a nested preview cannot re-enter. Restate
+ * the handful of roles this skeleton draws from the scheme-invariant static
+ * ramp, so a light tile stays light while the dark theme is active and the
+ * reverse. A theme's own inline tokens override these per tile. */
+.schemeLight {
+  --dsw-alias-bg-base: var(--dsw-static-neutral-bluish-50);
+  --dsw-alias-bg-layer-1: var(--dsw-static-neutral-bluish-00);
+  --dsw-alias-label-secondary: var(--dsw-static-neutral-bluish-700);
+  --dsw-alias-accent-primary: var(--dsw-static-deepseek-500);
+  --dsw-alias-border-l2: var(--dsw-static-neutral-bluish-200);
+  --dsw-specific-sidebar-fill: var(--dsw-static-neutral-bluish-75);
+}
+
+.schemeDark {
+  --dsw-alias-bg-base: var(--dsw-static-neutral-bluish-950);
+  --dsw-alias-bg-layer-1: var(--dsw-static-neutral-bluish-875);
+  --dsw-alias-label-secondary: var(--dsw-static-neutral-bluish-300);
+  --dsw-alias-accent-primary: var(--dsw-static-deepseek-400);
+  --dsw-alias-border-l2: var(--dsw-static-neutral-bluish-800);
+  --dsw-specific-sidebar-fill: var(--dsw-static-neutral-bluish-900);
+}
+
+.previewSidebar {
+  flex: 0 0 22%;
+  border-radius: 3px;
+  background: var(--dsh-tile-sidebar);
+}
+
+.previewBody {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px;
+  border-radius: 3px;
+  background: var(--dsh-tile-surface);
+}
+
+.previewLine {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--dsh-tile-line);
+  opacity: 0.5;
+}
+
+.previewLineShort {
+  width: 62%;
+}
+
+.previewDot {
+  width: 8px;
+  height: 8px;
+  margin-top: 2px;
+  border-radius: var(--dsw-radius-full);
+  background: var(--dsh-tile-accent);
+}
+
+.tileName {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Chip on the preview's top-right corner: the check reads against the row's
+ * own surface, not against whichever backdrop the tile happens to paint. */
+.check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: block;
+  box-sizing: content-box;
+  padding: 2px;
+  border-radius: var(--dsw-radius-full);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-accent-primary);
 }

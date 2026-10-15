@@ -1,0 +1,38 @@
+/* Abyss artwork: two shafts of light through deep water.
+
+   The default theme keeps its canvas opaque, so this layer is glimpsed at the
+   frame's edges rather than looked at. It is static on purpose — the
+   professional preset does not move while you work. No animation here, hence
+   no reduced-motion branch. */
+
+.abyss {
+  position: absolute;
+  inset: 0;
+}
+
+/* A wide, tilted band whose falloff runs the full length, so neither end has
+   an edge to notice. */
+.shaft {
+  position: absolute;
+  top: -30%;
+  height: 160%;
+  background: linear-gradient(
+    180deg,
+    var(--dsh-backdrop-accent) 0%,
+    var(--dsh-backdrop-ink) 45%,
+    transparent 100%
+  );
+}
+
+.shaft:nth-child(1) {
+  left: 14%;
+  width: 18%;
+  transform: rotate(14deg);
+}
+
+.shaft:nth-child(2) {
+  left: 58%;
+  width: 26%;
+  transform: rotate(9deg);
+  opacity: 0.7;
+}

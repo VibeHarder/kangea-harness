@@ -1,64 +1,44 @@
 /**
- * Theme bootstrap row for the browser's pre-plugin interval. Each index
- * render embeds the current durable built-in preference, font sizes, and
- * font-family lists. Head CSS colors the document canvas before script
- * execution; the body script installs the palette selector and font variables
- * that the client presenters adopt.
+ * Host-rendered theme bootstrap for the browser's pre-plugin interval. Each
+ * index response embeds the built-in preference the durable selection paints
+ * as — the selection itself when it is a built-in, otherwise the registered
+ * theme's persisted `colorScheme` hint, so a theme pack's dark palette does
+ * not first paint light and snap. The browser resolves only `system`, then
+ * writes the same DOM fields ui-layout's ThemePresenter owns after the client
+ * plugin tree activates. The script's vocabulary stays the built-in triple:
+ * theme ids live in the plugin world, which owns every later DOM update.
  */
 
-import type { IndexInjection } from '@deepseek-ai/dsh-host-webserver'
-import {
-  DEFAULT_FONT_SIZES, DEFAULT_PREFERENCE, FONT_ROLES, FONT_SIZE_SPECS, fontFamilyVariable, normalizeFontFamily,
-  type FontFamilies, type FontSizes, type ThemePreference,
-} from './theme-settings.ts'
+import { DEFAULT_PREFERENCE, type BuiltinThemePreference } from './theme-settings.ts'
 
-const LIGHT_BACKGROUND = '#fff'
-const DARK_BACKGROUND = '#151517'
-
-/** CSS that colors the document canvas before any script executes. */
-function bootThemeStyle(preference: ThemePreference): string {
-  const light = `:root{color-scheme:light}body{background-color:${LIGHT_BACKGROUND};--dsh-boot-bg:${LIGHT_BACKGROUND}}`
-  const dark = `:root{color-scheme:dark}body{background-color:${DARK_BACKGROUND};--dsh-boot-bg:${DARK_BACKGROUND}}`
-  if (preference === 'light') return light
-  if (preference === 'dark') return dark
-  return `${light}@media(prefers-color-scheme:dark){${dark}}`
-}
-
-/** Build the body script that installs the palette selector and font variables. */
-function bootThemeBodyScript(preference: ThemePreference, fontSizes: FontSizes, fontFamilies: FontFamilies): string {
-  const sizes = FONT_ROLES.map(role =>
-    `\n  document.body.style.setProperty(${JSON.stringify(FONT_SIZE_SPECS[role].variable)}, ${JSON.stringify(`${fontSizes[role]}px`)})`).join('')
-  const families = FONT_ROLES.flatMap((kind) => {
-    const list = normalizeFontFamily(fontFamilies[kind])
-    return list === '' ? [] : [`\n  document.body.style.setProperty(${JSON.stringify(fontFamilyVariable(kind))}, ${JSON.stringify(list)})`]
-  }).join('')
-  return `(() => {
+/** Build the inline script for one schema-validated built-in preference. */
+function bootThemeScript(preference: BuiltinThemePreference): string {
+  return `<script>(() => {
   const preference = ${JSON.stringify(preference)}
   const systemDark = preference === 'system'
     && typeof matchMedia !== 'undefined'
     && matchMedia('(prefers-color-scheme: dark)').matches
   const dark = preference === 'dark' || systemDark
-  document.documentElement.dataset.dsThemeSource = preference
-  document.body.toggleAttribute('data-ds-dark-theme', dark)${sizes}${families}
-})()`
+  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+  document.body.toggleAttribute('data-ds-dark-theme', dark)
+})()</script>`
 }
 
 /**
- * Theme bootstrap rows: head CSS colors the document canvas before
- * first paint, then the body script installs the palette selector and font
- * size and font families before the shell mount and module script.
- * @param preference - Current Host-backed built-in preference.
- * @param fontSizes - Current Host-backed font sizes in px by role.
- * @param fontFamilies - Current Host-backed font lists; each is normalized before embedding.
- * @returns head and body script rows in execution order.
+ * Insert the theme bootstrap immediately after the opening body tag, before
+ * the shell mount and module script. Body-less fragments receive it at the
+ * end, where the HTML parser has already synthesized a body.
+ * @param html - Raw application index HTML.
+ * @param preference - Built-in preference the durable selection paints as.
+ * @returns HTML containing the theme bootstrap.
  */
-export function bootThemeInjections(
-  preference: ThemePreference = DEFAULT_PREFERENCE,
-  fontSizes: FontSizes = DEFAULT_FONT_SIZES,
-  fontFamilies: FontFamilies = { text: '', code: '', terminal: '' },
-): IndexInjection[] {
-  return [
-    { kind: 'style', text: bootThemeStyle(preference) },
-    { kind: 'script', placement: 'body', text: bootThemeBodyScript(preference, fontSizes, fontFamilies) },
-  ]
+export function injectBootTheme(
+  html: string,
+  preference: BuiltinThemePreference = DEFAULT_PREFERENCE,
+): string {
+  const script = bootThemeScript(preference)
+  const body = /<body(?:\s[^>]*)?>/i.exec(html)
+  if (body === null) return `${html}${script}`
+  const at = body.index + body[0].length
+  return `${html.slice(0, at)}${script}${html.slice(at)}`
 }

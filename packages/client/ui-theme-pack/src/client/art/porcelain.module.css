@@ -1,0 +1,30 @@
+/* Porcelain artwork: one bloom and a grain, and nothing else.
+
+   No animation anywhere in this file, by design rather than by omission —
+   stillness is this theme's whole argument, so there is no motion to reduce
+   and no reduced-motion branch to write. */
+
+.porcelain {
+  position: absolute;
+  inset: 0;
+}
+
+/* A single huge diffusion spreading from above the top edge, so the falloff
+   crosses the window instead of ending inside it. */
+.bloom {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 70% at 50% -10%, var(--dsh-backdrop-ink) 0%, transparent 68%);
+}
+
+/* Barely-there tooth: an SVG turbulence tile, small enough to stay in cache and
+   faint enough to read as paper rather than as noise. Inline data URI — the
+   layer must not depend on a network fetch to look finished. */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background-repeat: repeat;
+  background-size: 120px 120px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23g)'/%3E%3C/svg%3E");
+}

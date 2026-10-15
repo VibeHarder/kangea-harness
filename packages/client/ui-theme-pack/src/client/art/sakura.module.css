@@ -1,0 +1,271 @@
+/* Sakura artwork: clouds over the sky gradient, petals falling through it.
+
+   The sky itself is the theme's --dsh-backdrop-base on the shared layer; this
+   file adds the two things that make it a place — soft cloud masses in the
+   middle band, and twelve petals crossing the window.
+
+   The petals are the only continuous animation in the pack that travels, and
+   they travel on `transform` and `opacity` alone. Their edges are gradient
+   falloffs, never `filter: blur()`: blurring elements this size, this often,
+   over this area is the one thing that would show up in the frame budget. */
+
+.sakura {
+  position: absolute;
+  inset: 0;
+}
+
+.clouds {
+  position: absolute;
+  inset: 0;
+}
+
+/* Each cloud is one wide, very soft ellipse. The long falloff (out to 72%) is
+   what keeps the edge from banding against the sky. */
+.cloud {
+  position: absolute;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--dsh-backdrop-ink) 0%, transparent 72%);
+}
+
+.cloud:nth-child(1) {
+  top: 14%;
+  left: -8%;
+  width: 46%;
+  height: 26%;
+  opacity: 0.55;
+}
+
+.cloud:nth-child(2) {
+  top: 26%;
+  left: 34%;
+  width: 54%;
+  height: 22%;
+  opacity: 0.4;
+}
+
+.cloud:nth-child(3) {
+  top: 8%;
+  left: 62%;
+  width: 44%;
+  height: 20%;
+  opacity: 0.5;
+}
+
+.cloud:nth-child(4) {
+  top: 44%;
+  left: 8%;
+  width: 62%;
+  height: 18%;
+  opacity: 0.28;
+}
+
+.petals {
+  position: absolute;
+  inset: 0;
+}
+
+/* One petal: a leaf silhouette from opposed corner radii, small enough that
+   its compositor layer costs nothing. */
+.petal {
+  position: absolute;
+  top: 0;
+  width: 11px;
+  height: 8px;
+  border-radius: 100% 0 100% 0;
+  background: var(--dsh-backdrop-accent);
+  opacity: 0;
+  will-change: transform;
+}
+
+.petal:nth-child(1) {
+  left: 4%;
+}
+
+.petal:nth-child(2) {
+  left: 13%;
+}
+
+.petal:nth-child(3) {
+  left: 21%;
+}
+
+.petal:nth-child(4) {
+  left: 29%;
+}
+
+.petal:nth-child(5) {
+  left: 38%;
+}
+
+.petal:nth-child(6) {
+  left: 46%;
+}
+
+.petal:nth-child(7) {
+  left: 55%;
+}
+
+.petal:nth-child(8) {
+  left: 63%;
+}
+
+.petal:nth-child(9) {
+  left: 71%;
+}
+
+.petal:nth-child(10) {
+  left: 79%;
+}
+
+.petal:nth-child(11) {
+  left: 87%;
+}
+
+.petal:nth-child(12) {
+  left: 94%;
+}
+
+/* Two sway directions so the fall never reads as a column of clones. */
+@keyframes sakura-fall-left {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -14vh, 0) rotate(0deg);
+  }
+
+  8% {
+    opacity: 0.9;
+  }
+
+  50% {
+    transform: translate3d(-4vw, 46vh, 0) rotate(200deg);
+  }
+
+  90% {
+    opacity: 0.9;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(2vw, 114vh, 0) rotate(430deg);
+  }
+}
+
+@keyframes sakura-fall-right {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -14vh, 0) rotate(0deg);
+  }
+
+  8% {
+    opacity: 0.85;
+  }
+
+  50% {
+    transform: translate3d(5vw, 44vh, 0) rotate(-170deg);
+  }
+
+  90% {
+    opacity: 0.85;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(-3vw, 114vh, 0) rotate(-400deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .petal {
+    animation: sakura-fall-left 16s linear infinite;
+  }
+
+  .petal:nth-child(even) {
+    animation-name: sakura-fall-right;
+  }
+
+  /* Durations 12-22s and negative delays: every petal is already mid-fall on
+     the first frame, so the layer never starts with an empty sky. */
+  .petal:nth-child(1) {
+    animation-duration: 13s;
+    animation-delay: -2s;
+  }
+
+  .petal:nth-child(2) {
+    animation-duration: 19s;
+    animation-delay: -11s;
+  }
+
+  .petal:nth-child(3) {
+    animation-duration: 15s;
+    animation-delay: -6s;
+  }
+
+  .petal:nth-child(4) {
+    animation-duration: 22s;
+    animation-delay: -17s;
+  }
+
+  .petal:nth-child(5) {
+    animation-duration: 12s;
+    animation-delay: -4s;
+  }
+
+  .petal:nth-child(6) {
+    animation-duration: 18s;
+    animation-delay: -13s;
+  }
+
+  .petal:nth-child(7) {
+    animation-duration: 20s;
+    animation-delay: -8s;
+  }
+
+  .petal:nth-child(8) {
+    animation-duration: 14s;
+    animation-delay: -1s;
+  }
+
+  .petal:nth-child(9) {
+    animation-duration: 17s;
+    animation-delay: -15s;
+  }
+
+  .petal:nth-child(10) {
+    animation-duration: 21s;
+    animation-delay: -9s;
+  }
+
+  .petal:nth-child(11) {
+    animation-duration: 16s;
+    animation-delay: -19s;
+  }
+
+  .petal:nth-child(12) {
+    animation-duration: 12.5s;
+    animation-delay: -5s;
+  }
+}
+
+/* Reduced motion keeps the petals and drops the fall: they hold scattered
+   positions down the window, as a still frame of the same picture. */
+@media (prefers-reduced-motion: reduce) {
+  .petal {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .petal:nth-child(odd) {
+    transform: translate3d(0, 22vh, 0) rotate(24deg);
+  }
+
+  .petal:nth-child(even) {
+    transform: translate3d(0, 63vh, 0) rotate(-38deg);
+  }
+
+  .petal:nth-child(3n) {
+    transform: translate3d(0, 41vh, 0) rotate(72deg);
+  }
+
+  .petal:nth-child(4n) {
+    transform: translate3d(0, 78vh, 0) rotate(-12deg);
+  }
+}

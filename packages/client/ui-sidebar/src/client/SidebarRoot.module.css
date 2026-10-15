@@ -13,7 +13,10 @@
   height: 100%;
   padding: 6px var(--dsh-sidebar-inline-padding);
   box-sizing: border-box;
-  background: var(--dsw-specific-sidebar-fill);
+  /* ui-theme's shell indirection over --dsw-specific-sidebar-fill, the same
+     token the layout column paints: a theme with backdrop artwork rebinds the
+     pair once and both the column and this occupant let it through. */
+  background: var(--dsh-shell-sidebar-surface);
   color: var(--dsw-alias-label-primary);
   font-size: 14px;
   /* The sidebar is elevated above the conversation surface, so a revealed
