@@ -171,3 +171,21 @@
 .overlayLayer > * {
   pointer-events: auto;
 }
+
+/* Phones keep the navigation rail available, but reclaim desktop panel tracks
+   and resize affordances. AppFrame supplies the 48px mobile rail width so the
+   centre column gets the rest of the viewport without a squeezed right panel. */
+@media (max-width: 640px) {
+  .frame[data-mobile] {
+    grid-template-rows: 100%;
+  }
+
+  .frame[data-mobile] .detailsCol,
+  .frame[data-mobile] .handle[data-side='rightbar'] {
+    display: none;
+  }
+
+  .frame[data-mobile] .sidebarCol {
+    border-right-color: var(--dsw-alias-border-l2);
+  }
+}

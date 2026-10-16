@@ -520,3 +520,63 @@
   text-decoration: line-through;
   opacity: 0.7;
 }
+
+/* Phone composer: preserve every action, but let the mode chips and select
+   labels give way before the send button is pushed off-screen. */
+@media (max-width: 640px) {
+  .root {
+    padding: 0 var(--dsh-composer-side-clearance) calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .hero {
+    padding: 0 var(--dsh-composer-side-clearance);
+  }
+
+  .card {
+    border-radius: 16px;
+    gap: 8px;
+  }
+
+  .row {
+    gap: 4px;
+    padding: 2px 6px 6px;
+  }
+
+  .tools {
+    gap: 6px;
+  }
+
+  .modes {
+    min-width: 0;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .trailing {
+    gap: 6px;
+  }
+
+  .select {
+    max-width: 96px;
+    padding-right: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .primary {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 390px) {
+  .select {
+    max-width: 72px;
+    font-size: 12px;
+  }
+
+  .tools,
+  .trailing {
+    gap: 4px;
+  }
+}
