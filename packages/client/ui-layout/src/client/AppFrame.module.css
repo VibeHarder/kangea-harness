@@ -177,15 +177,31 @@
    centre column gets the rest of the viewport without a squeezed right panel. */
 @media (max-width: 640px) {
   .frame[data-mobile] {
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: 100%;
   }
 
+  .frame[data-mobile] .sidebarCol,
   .frame[data-mobile] .detailsCol,
-  .frame[data-mobile] .handle[data-side='rightbar'] {
+  .frame[data-mobile] .handle,
+  .frame[data-mobile] [data-shell-bottom] {
     display: none;
   }
 
-  .frame[data-mobile] .sidebarCol {
-    border-right-color: var(--dsw-alias-border-l2);
+  .frame[data-mobile] [data-shell-leading] {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 30;
+    padding: 4px;
+    border: 1px solid var(--dsw-alias-border-l1);
+    border-radius: var(--dsw-radius-m);
+    background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 92%, transparent);
+    box-shadow: var(--ds-shadow-lv2, var(--dsw-shadow-lv2));
+  }
+
+  .frame[data-mobile] [data-shell-leading] .iconButton {
+    width: 36px;
+    height: 36px;
   }
 }

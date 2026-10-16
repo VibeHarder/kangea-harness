@@ -328,18 +328,8 @@
   }
 }
 
-/* The mobile rail is slimmer than the desktop 56px rail while retaining the
-   same 36px touch targets and panel navigation. */
+/* The phone shell hides the sidebar column and mounts its leading controls as a
+   floating button group; keep the collapsed rail rules only for tablet widths. */
 @media (max-width: 640px) {
-  .root.collapsed {
-    padding: 12px 6px 6px;
-  }
-
-  .collapsed .logoRow {
-    margin-bottom: 8px;
-  }
-
-  .collapsed .newSession {
-    margin-bottom: 8px;
-  }
+  .root { display: none; }
 }

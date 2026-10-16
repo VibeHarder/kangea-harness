@@ -419,4 +419,21 @@
   .scrollBody {
     scrollbar-gutter: auto;
   }
+
+  .heroWorkspaceRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 0;
+  }
+
+  .heroWorkspaceRow > * {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .heroWorkspaceRow > :global(button) {
+    justify-content: space-between;
+    max-width: none;
+  }
 }

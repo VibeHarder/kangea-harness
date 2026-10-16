@@ -130,3 +130,11 @@
   color: var(--dsw-alias-label-caption);
   white-space: normal;
 }
+
+@media (max-width: 640px) {
+  .seat {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+  }
+}
